@@ -23,8 +23,8 @@ def generate_hash_value(table_name: str) -> str:
             TEX.append(key)
     # print(NUM, TEX)
     hash_value_sql = open_ai(
-        f"""please generate a sql select statement by making sum of numeric colums and count of non numeric from table emp
+        f"""please generate a sql select statement by making sum of numeric colums and count of non numeric from table emp,
         numeric columns are {NUM} and non numeric columns are {TEX}  and finally make a full sum all of these values and put it in md5() function as md5(value)
-        SQL statement doesn't require to find if they numeric just a select statement without any condictions"""
+        SQL statement doesn't require to find if they are numeric just a select statement without any conditions"""
     )
     return hash_value_sql
