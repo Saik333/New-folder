@@ -28,6 +28,3 @@ def generate_hash_value(table_name: str) -> str:
         SQL statement doesn't require to find if they numeric just a select statement without any condictions"""
     )
     return hash_value_sql
-
-
-generate_hash_value("EMP")
