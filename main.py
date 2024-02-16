@@ -44,5 +44,5 @@ target hash = {target_hash}"""
 
 print(hash_value())
 
-
+# python main.py source=EMP target=EMP_TARGET
 
