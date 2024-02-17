@@ -1,12 +1,19 @@
 from openai import OpenAI
+import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def open_ai(prompt: str) -> str:
-    client = OpenAI(api_key="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")
+    print("Connecting to OpenAI")
+    client = OpenAI(api_key=f"{os.environ.get('OPENAI_API_KEY1')}")
 
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo", messages=[{"role": "user", "content": f"""{prompt}"""}]
     )
+    print("Connection to OpenAI is successful")
     message = completion.choices[0].message.content
 
     start_index = str(message).find("```")
