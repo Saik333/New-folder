@@ -11,7 +11,8 @@ from null_checks.find_nulls import find_null_values
 from null_checks.replace_nulls import replace_null_values
 from pattern_match.pattern_match import email_pattern_check
 from range_check.range_check import min_max_range_check
-from accepted_values.pattern_match import accepted_values_check
+from accepted_values.accepted_values import accepted_values_check
+from referential_integrity_check.referential_integrity import referential_integrity_check
 
 session = snowflake_connection()
 client = open_ai()
@@ -50,13 +51,13 @@ def hash_value() -> str:
                     f"""source hash = {source_hash}
 target hash = {target_hash}"""
                 )
-                print("PASS: Hash Validation successful")
+                print("\033[92m" + "PASS: Hash Validation successful" + "\033[0m")
                 return "PASS: Hash Validation successful"
             else:
                 print(
-                    f"""Fail: Hash validation failed)
+                    "\033[91m" + f"""Fail: Hash validation failed
 source hash = {source_hash}
-target hash = {target_hash}"""
+target hash = {target_hash}""" + "\033[0m"
                 )
                 return "Fail: Hash validation failed"
 
@@ -88,7 +89,7 @@ def duplicates():
             number_of_duplicates = int(duplicates.count())
             if number_of_duplicates > 0:
                 print(
-                    f"{number_of_duplicates} duplicate(s) found, trying to remove them"
+                    "\033[91m" + f"{number_of_duplicates} duplicate(s) found, trying to remove them" + "\033[0m"
                 )
                 counter = 1
                 while counter <= 5:
@@ -98,7 +99,7 @@ def duplicates():
                         )
                         print("duplicates_remove_query:", remove_deplicates_query)
                         session.sql(remove_deplicates_query).collect()
-                        print("duplicates removed")
+                        print("\033[92m" + "duplicates removed" + "\033[0m")
                         return
                     except:
                         if counter == 5:
@@ -113,7 +114,7 @@ def duplicates():
                             count += 1
 
             else:
-                print("No duplicates found")
+                print("\033[92m" + "No duplicates found" + "\033[0m")
             return
         except:
             if count == 5:
@@ -139,7 +140,7 @@ def missing_values():
             number_of_nulls = int(nulls.count())
             if number_of_nulls > 0:
                 print(
-                    f"{number_of_nulls} null(s) found, trying to replace them with custom value '0'"
+                    "\033[91m" + f"{number_of_nulls} null(s) found, trying to replace them with custom value '0'" + "\033[0m"
                 )
                 counter = 1
                 while counter <= 5:
@@ -149,7 +150,7 @@ def missing_values():
                         )
                         print("null_replace_query:", replace_nulls_query)
                         session.sql(replace_nulls_query).collect()
-                        print("nulls replaced")
+                        print("\033[92m" + "nulls replaced" + "\033[0m")
                         return
                     except:
                         if counter == 5:
@@ -164,7 +165,7 @@ def missing_values():
                             count += 1
 
             else:
-                print("No nulls found")
+                print("\033[92m" + "No nulls found" + "\033[0m")
             return
         except:
             if count == 5:
@@ -191,11 +192,11 @@ def pattern_check(config: dict):
             mismatches = session.sql(pattern_check_query.replace(";", ""))
             number_of_mimatches = int(mismatches.count())
             if number_of_mimatches > 0:
-                print(f"FAIL: {mismatches} pattern mismatch(s) found")
+                print("\033[91m" + f"FAIL: {mismatches} pattern mismatch(s) found" + "\033[0m")
                 mismatches.show()
 
             else:
-                print("No pattern mismatches found")
+                print("\033[92m" + "No pattern mismatches found" + "\033[0m")
             return
         except:
             if count == 5:
@@ -225,11 +226,11 @@ def range_check(config: dict):
             mismatches = session.sql(range_check_query.replace(";", ""))
             number_of_mimatches = int(mismatches.count())
             if number_of_mimatches > 0:
-                print(f"FAIL: {mismatches} range mismatch(s) found")
+                print("\033[91m" + f"FAIL: {mismatches} range mismatch(s) found" + "\033[0m")
                 mismatches.show()
 
             else:
-                print("No range mismatches found")
+                print("\033[92m" + "No range mismatches found" + "\033[0m")
             return
         except:
             if count == 5:
@@ -243,7 +244,6 @@ def range_check(config: dict):
                 )
                 count += 1
 
-
 def accepted_values(config: dict):
     count = 1
     while count <= 5:
@@ -254,25 +254,58 @@ def accepted_values(config: dict):
                 config.accepted_values.column_name,
                 config.accepted_values.accepted_values_list,
             )
-            print("range_check_query:", accepted_values_check_query)
+            print("accepted_values_check_query:", accepted_values_check_query)
             mismatches = session.sql(accepted_values_check_query.replace(";", ""))
             number_of_mimatches = int(mismatches.count())
             if number_of_mimatches > 0:
-                print(f"FAIL: {mismatches} accpted values mismatch(s) found")
+                print("\033[91m" + f"FAIL: {mismatches} accepted values mismatch(s) found" + "\033[0m")
                 mismatches.show()
 
             else:
-                print("No accpted values mismatches found")
+                print("\033[92m" + "No accepted values mismatches found" + "\033[0m")
             return
         except:
             if count == 5:
                 print(
-                    "Unable to perform operation to find accpted values mismatches after 5 attempts raising the error"
+                    "Unable to perform operation to find accepted values mismatches after 5 attempts raising the error"
                 )
                 raise
             else:
                 print(
-                    f"failure in finding accpted values mismatches in attempt: {count}, retrying..."
+                    f"failure in finding accepted values mismatches in attempt: {count}, retrying..."
+                )
+                count += 1
+
+def ref_integrity(config: dict):
+    count = 1
+    while count <= 5:
+        try:
+            ref_integtity_check_query = referential_integrity_check(
+                os.environ.get("target"),
+                client,
+                config.referential_integrity.reference_table,
+                config.referential_integrity.child_column,
+                config.referential_integrity.parent_column
+            )
+            print("ref_integrity_check_query:", ref_integtity_check_query)
+            mismatches = session.sql(ref_integtity_check_query.replace(";", ""))
+            number_of_mimatches = int(mismatches.count())
+            if number_of_mimatches > 0:
+                print("\033[91m" + f"FAIL: {mismatches} referential integrity mismatch(s) found" + "\033[0m")
+                mismatches.show()
+
+            else:
+                print("\033[92m" + "No referential integrity mismatches found" + "\033[0m")
+            return
+        except:
+            if count == 5:
+                print(
+                    "Unable to perform operation to find referential integrity mismatches after 5 attempts raising the error"
+                )
+                raise
+            else:
+                print(
+                    f"failure in finding referential integrity mismatches in attempt: {count}, retrying..."
                 )
                 count += 1
 
@@ -295,6 +328,8 @@ def run():
         range_check(config)
     if os.environ.get("check") in ("accepted_values_validation", "all"):
         accepted_values(config)
+    if os.environ.get("check") in ("ref_integrity_validation", "all"):
+        ref_integrity(config)
     # duplicates()
     # missing_values()
 

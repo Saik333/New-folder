@@ -1,7 +1,7 @@
 source_table: EMPLOYEES_SOURCE
 target_table: EMPLOYEES_TARGET
 
-pattern_check: 
+pattern_check:
   column_name: EMAIL
   pattern: "Can start with anything but should end with @DOMAIN.COM"
 
@@ -16,3 +16,8 @@ accepted_values:
     - M
     - F
     - O
+
+referential_integrity:
+  reference_table: DEPARTMENTS
+  child_column: DEPARTMENT
+  parent_column: DEPTNAME
