@@ -9,6 +9,8 @@ from duplicate_check.find_duplicates import find_duplicate_values
 from duplicate_check.remove_duplicates import remove_duplicate_values
 from null_checks.find_nulls import find_null_values
 from null_checks.replace_nulls import replace_null_values
+from pattern_match.pattern_match import email_pattern_check
+from range_check.range_check import min_max_range_check
 
 session = snowflake_connection()
 client = open_ai()
@@ -69,7 +71,7 @@ def duplicates():
             # if not duplicates_query.strip().upper().startswith("SELECT"):
             #     duplicates_query = refine_the_query(duplicates_query)
             #     print("query after refining:", duplicates_query)
-            duplicates = session.sql(duplicates_query)
+            duplicates = session.sql(duplicates_query.replace(";",""))
             number_of_duplicates = int(duplicates.count())
             if number_of_duplicates > 0:
                 print(f"{number_of_duplicates} duplicate(s) found, trying to remove them")
@@ -107,7 +109,7 @@ def missing_values():
             key_columns, nulls_query = find_null_values(os.environ.get("target"), session, client)
             print("nulls_query:", nulls_query)
             print("key columns: ", key_columns)
-            nulls = session.sql(nulls_query)
+            nulls = session.sql(nulls_query.replace(";",""))
             number_of_nulls = int(nulls.count())
             if number_of_nulls > 0:
                 print(f"{number_of_nulls} null(s) found, trying to replace them with custom value '0'")
@@ -138,6 +140,52 @@ def missing_values():
                 print(f"failure in finding nulls in attempt: {count}, retrying...")
                 count += 1
 
+def pattern_check(config: dict):
+    count = 1
+    while count <= 5:
+        try:
+            pattern_check_query = email_pattern_check(os.environ.get('target'), client, config.pattern_check.column_name, config.pattern_check.pattern)
+            print("pattern_query:", pattern_check_query)
+            mismatches = session.sql(pattern_check_query.replace(";", ""))
+            number_of_mimatches = int(mismatches.count())
+            if number_of_mimatches > 0:
+                print(f"FAIL: {mismatches} pattern mismatch(s) found")
+                mismatches.show()
+
+            else:
+                print("No pattern mismatches found")
+            return
+        except:
+            if count == 5:
+                print("Unable to perform operation to find pattern mismatches after 5 attempts raising the error")
+                raise
+            else:
+                print(f"failure in finding pattern mismatches in attempt: {count}, retrying...")
+                count += 1
+
+def range_check(config: dict):
+    count = 1
+    while count <= 5:
+        try:
+            range_check_query = min_max_range_check(os.environ.get('target'), client, config.range_check.column_name, config.range_check.min_value, config.range_check.max_value)
+            print("range_check_query:", range_check_query)
+            mismatches = session.sql(range_check_query.replace(";", ""))
+            number_of_mimatches = int(mismatches.count())
+            if number_of_mimatches > 0:
+                print(f"FAIL: {mismatches} range mismatch(s) found")
+                mismatches.show()
+
+            else:
+                print("No range mismatches found")
+            return
+        except:
+            if count == 5:
+                print("Unable to perform operation to find range mismatches after 5 attempts raising the error")
+                raise
+            else:
+                print(f"failure in finding range mismatches in attempt: {count}, retrying...")
+                count += 1
+
 
 def run():
     with open(f"{os.getcwd()}/config/config.yaml", "r") as file:
@@ -147,10 +195,14 @@ def run():
     os.environ["target"] = config.target_table
     if os.environ.get("check") in("hash_validation", "all"):
         hash_value()
-    elif os.environ.get("check") in("duplicate_validation", "all"):
+    if os.environ.get("check") in("duplicate_validation", "all"):
         duplicates()
-    elif os.environ.get("check") in("null_validation", "all"):
+    if os.environ.get("check") in("null_validation", "all"):
         missing_values()
+    if os.environ.get("check") in("pattern_validation", "all"):
+        pattern_check(config)
+    if os.environ.get("check") in("range_validation", "all"):
+        range_check(config)
     # duplicates()
     # missing_values()
     
