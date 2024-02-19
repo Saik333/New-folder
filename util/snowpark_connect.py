@@ -7,13 +7,13 @@ load_dotenv()
 
 def snowflake_connection():
     connection_parameters = {
-        "account": "assjfrj-rw85836",
-        "user": "saikumar",
+        "account": f"{environ.get('snowflake_account')}",
+        "user": f"{environ.get('snowflake_username')}",
         "password": f"{environ.get('snowflake_password')}",
-        "role": "ACCOUNTADMIN",
-        "warehouse": "COMPUTE_WH",
-        "database": "SAI",
-        "schema": "PUBLIC",
+        "role": f"{environ.get('snowflake_role')}",
+        "warehouse": f"{environ.get('snowflake_warehouse')}",
+        "database": f"{environ.get('snowflake_database')}",
+        "schema": f"{environ.get('snowflake_schema')}",
     }
     try:
         print("Connecting to Snowflake")

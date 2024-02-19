@@ -11,6 +11,7 @@ from null_checks.find_nulls import find_null_values
 from null_checks.replace_nulls import replace_null_values
 from pattern_match.pattern_match import email_pattern_check
 from range_check.range_check import min_max_range_check
+from accepted_values.pattern_match import accepted_values_check
 
 session = snowflake_connection()
 client = open_ai()
@@ -243,6 +244,39 @@ def range_check(config: dict):
                 count += 1
 
 
+def accepted_values(config: dict):
+    count = 1
+    while count <= 5:
+        try:
+            accepted_values_check_query = accepted_values_check(
+                os.environ.get("target"),
+                client,
+                config.accepted_values.column_name,
+                config.accepted_values.accepted_values_list,
+            )
+            print("range_check_query:", accepted_values_check_query)
+            mismatches = session.sql(accepted_values_check_query.replace(";", ""))
+            number_of_mimatches = int(mismatches.count())
+            if number_of_mimatches > 0:
+                print(f"FAIL: {mismatches} accpted values mismatch(s) found")
+                mismatches.show()
+
+            else:
+                print("No accpted values mismatches found")
+            return
+        except:
+            if count == 5:
+                print(
+                    "Unable to perform operation to find accpted values mismatches after 5 attempts raising the error"
+                )
+                raise
+            else:
+                print(
+                    f"failure in finding accpted values mismatches in attempt: {count}, retrying..."
+                )
+                count += 1
+
+
 def run():
     with open(f"{os.getcwd()}/config/config.yaml", "r") as file:
         config = yaml.safe_load(file)
@@ -259,6 +293,8 @@ def run():
         pattern_check(config)
     if os.environ.get("check") in ("range_validation", "all"):
         range_check(config)
+    if os.environ.get("check") in ("accepted_values_validation", "all"):
+        accepted_values(config)
     # duplicates()
     # missing_values()
 
