@@ -3,3 +3,4 @@ python-dotenv
 snowflake-snowpark-python[pandas]
 snowflake-snowpark-python
 pytest
+python-box

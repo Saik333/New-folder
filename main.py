@@ -1,17 +1,21 @@
-from generate_hash import generate_hash_value
-from snowpark_connect import snowflake_connection
-from find_duplicates import find_duplicate_values
-from remove_duplicates import remove_duplicate_values
-from find_nulls import find_null_values
-from replace_nulls import replace_null_values
 import os
+import yaml
 import sys
+from box import Box
+from hash_check.generate_hash import generate_hash_value
+from util.snowpark_connect import snowflake_connection
+from util.open_ai import open_ai
+from duplicate_check.find_duplicates import find_duplicate_values
+from duplicate_check.remove_duplicates import remove_duplicate_values
+from null_checks.find_nulls import find_null_values
+from null_checks.replace_nulls import replace_null_values
+
+session = snowflake_connection()
+client = open_ai()
 
 for arg in sys.argv[1:]:
     key, value = arg.split("=")
     os.environ[key] = value
-
-session = snowflake_connection()
 
 # def refine_the_query(query: str) -> str:
 #     words = query.split()
@@ -23,7 +27,7 @@ def hash_value() -> str:
     source_hash = ""
     target_hash = ""
     while count <= 5:
-        generate_hash = generate_hash_value(os.environ.get("source"))
+        generate_hash = generate_hash_value(os.environ.get("source"), client, session)
         # if not generate_hash.strip().upper().startswith("SELECT"):
         #     generate_hash = refine_the_query(generate_hash)
         #     print("query after refining: ", generate_hash)
@@ -38,11 +42,13 @@ def hash_value() -> str:
             if source_hash == target_hash:
                 print(f"""source hash = {source_hash}
 target hash = {target_hash}""")
+                print("PASS: Hash Validation successful")
                 return "PASS: Hash Validation successful" 
             else:
-                return f"""FAIL: Both the hash values are not equal 
+                print(f"""Fail: Hash validation failed)
 source hash = {source_hash}
-target hash = {target_hash}"""
+target hash = {target_hash}""")
+                return "Fail: Hash validation failed"
             
         except Exception as e:
             if count == 5:
@@ -56,7 +62,7 @@ def duplicates():
     count = 1
     while count <= 5:
         try:
-            key_columns, duplicates_query = find_duplicate_values(os.environ.get("target"))
+            key_columns, duplicates_query = find_duplicate_values(os.environ.get("target"), session, client)
             print("duplicates_query:", duplicates_query)
             print("key columns: ", key_columns)
             # return
@@ -70,7 +76,7 @@ def duplicates():
                 counter = 1
                 while counter <= 5:
                     try:
-                        remove_deplicates_query = remove_duplicate_values(os.environ.get("target"), key_columns)
+                        remove_deplicates_query = remove_duplicate_values(os.environ.get("target"), key_columns, session, client)
                         print("duplicates_remove_query:", remove_deplicates_query)
                         session.sql(remove_deplicates_query).collect()
                         print("duplicates removed")
@@ -98,7 +104,7 @@ def missing_values():
     count = 1
     while count <= 5:
         try:
-            key_columns, nulls_query = find_null_values(os.environ.get("target"))
+            key_columns, nulls_query = find_null_values(os.environ.get("target"), session, client)
             print("nulls_query:", nulls_query)
             print("key columns: ", key_columns)
             nulls = session.sql(nulls_query)
@@ -108,7 +114,7 @@ def missing_values():
                 counter = 1
                 while counter <= 5:
                     try:
-                        replace_nulls_query = replace_null_values(os.environ.get("target"), key_columns)
+                        replace_nulls_query = replace_null_values(os.environ.get("target"), key_columns, session, client)
                         print("null_replace_query:", replace_nulls_query)
                         session.sql(replace_nulls_query).collect()
                         print("nulls replaced")
@@ -132,8 +138,27 @@ def missing_values():
                 print(f"failure in finding nulls in attempt: {count}, retrying...")
                 count += 1
 
-print(hash_value())
-duplicates()
-missing_values()
-# python main.py source=EMP target=EMP_TARGET
+
+def run():
+    with open(f"{os.getcwd()}/config/config.yaml", "r") as file:
+        config = yaml.safe_load(file)
+    config = Box(config)
+    os.environ["source"] = config.source_table
+    os.environ["target"] = config.target_table
+    if os.environ.get("check") in("hash_validation", "all"):
+        hash_value()
+    elif os.environ.get("check") in("duplicate_validation", "all"):
+        duplicates()
+    elif os.environ.get("check") in("null_validation", "all"):
+        missing_values()
+    # duplicates()
+    # missing_values()
+    
+
+if __name__ == "__main__":
+    run()
+
+# python main.py check=hash_validation
+# python main.py check=duplicate_validation
+# python main.py check=null_validation
 
