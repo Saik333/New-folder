@@ -16,3 +16,7 @@ print(conn)
 
 a = conn.cursor().execute("SELECT CURRENT_USER(), CURRENT_ROLE();")
 print(a.fetchone())
+
+conn.cursor().execute("USE ROLE TEST_ROLE1;")
+a = conn.cursor().execute("SELECT CURRENT_USER(), CURRENT_ROLE();")
+print(a.fetchone())
