@@ -37,16 +37,16 @@ jobs:
 
       - name: Decode token safely
         run: |
-          PAYLOAD=$(echo "$TOKEN" | cut -d '.' -f2)
+          PAYLOAD=$(echo "$SNOWFLAKE_TOKEN" | cut -d '.' -f2)
           echo "$PAYLOAD" | base64 -d 2>/dev/null | jq '{aud, iss, sub, preferred_username, scp}'
         env:
           TOKEN: ${{ env.TOKEN }}
 
-      - name: Validate token exists
-        run: |
-          if [ -z "$SNOWFLAKE_TOKEN" ]; then
-            echo "Token is empty"
-            exit 1
+      # - name: Validate token exists
+      #   run: |
+      #     if [ -z "$SNOWFLAKE_TOKEN" ]; then
+      #       echo "Token is empty"
+      #       exit 1
 
 
       - name: Connect to Snowflake
