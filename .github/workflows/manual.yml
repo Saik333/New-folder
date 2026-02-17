@@ -1,6 +1,7 @@
 name: Snowflake OIDC
 
 on:
+  workflow_dispatch: 
   push:
     branches:
       - main
