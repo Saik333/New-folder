@@ -1,6 +1,8 @@
+import os
+
 print(os.environ["SNOWFLAKE_TOKEN"])
 # import snowflake.connector
-# import os
+
 
 # conn = snowflake.connector.connect(
 #     account="ranaqbw-np18722",
