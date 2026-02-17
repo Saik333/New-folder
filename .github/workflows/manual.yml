@@ -1,0 +1,31 @@
+name: Snowflake OIDC
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Get Azure Access Token for Snowflake
+        run: |
+          TOKEN=$(az account get-access-token \
+            --resource api://5fabb103-26ae-49f2-bd01-3897c33b9801 \
+            --query accessToken -o tsv)
+          echo "SNOWFLAKE_TOKEN=$TOKEN" >> $GITHUB_ENV
