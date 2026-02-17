@@ -33,4 +33,5 @@ jobs:
 
       - name: Connect to Snowflake
         run: |
+          pip install snowflake-connector-python
           python snowflake.py
