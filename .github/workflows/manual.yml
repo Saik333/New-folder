@@ -70,3 +70,6 @@ jobs:
           pip install snowflake-connector-python
           python snowflake_test.py
 
+
+          
+
