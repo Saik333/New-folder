@@ -9,7 +9,7 @@ conn = snowflake.connector.connect(
     user="5de13f72-cb16-47ec-8487-275ec596758c",
     authenticator="oauth",
     token=os.environ["SNOWFLAKE_TOKEN"],
-    role="ACCOUNTADMIN",
+    role="TEST_ROLE",
 )
 print
 print(conn)
