@@ -38,7 +38,7 @@ jobs:
       - name: Decode token safely
         run: |
           PAYLOAD=$(echo "$SNOWFLAKE_TOKEN" | cut -d '.' -f2)
-          echo "$PAYLOAD" | base64 -d 2>/dev/null | jq '{aud, iss, sub, preferred_username, scp}'
+          echo "$PAYLOAD" | base64 -d 2>/dev/null | jq '{aud, iss, sub, preferred_username, scp, appid}'
         env:
           TOKEN: ${{ env.TOKEN }}
 
