@@ -30,3 +30,7 @@ jobs:
             --query accessToken -o tsv)
           echo "SNOWFLAKE_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "$TOKEN"
+
+      - name: Connect to Snowflake
+        run: |
+          python snowflake.py
