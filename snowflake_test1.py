@@ -1,6 +1,6 @@
 import os
 
-print(os.environ["SNOWFLAKE_TOKEN"])
+print(os.environ["SNOWFLAKE_TOKEN1"])
 import snowflake.connector
 
 
@@ -8,7 +8,7 @@ conn = snowflake.connector.connect(
     account="ranaqbw-np18722",
     user="repo:Saik333/New-folder:ref:refs/heads/main",
     authenticator="oauth",
-    token=os.environ["SNOWFLAKE_TOKEN"],
+    token=os.environ["SNOWFLAKE_TOKEN1"],
     role="TEST_ROLE",
 )
 print
