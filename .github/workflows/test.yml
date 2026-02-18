@@ -15,10 +15,12 @@ jobs:
       - name: Get GitHub OIDC Token
         id: oidc
         run: |
-          echo "::set-output name=token::$(curl -s \
-            -H \"Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN\" \
-            \"https://token.actions.githubusercontent.com?audience=snowflake\")"
+          TOKEN=$(curl -s \
+          -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=snowflake" | jq -r '.value')
+    
+          echo "SNOWFLAKE_TOKEN=$TOKEN" >> $GITHUB_OUTPUT
 
       - name: print token
         run: |
-            echo "${{ steps.oidc.outputs.token }}"
+            echo "$SNOWFLAKE_TOKEN"
