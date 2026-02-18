@@ -19,7 +19,7 @@ jobs:
           -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
           "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=snowflake" | jq -r '.value')
     
-          echo "SNOWFLAKE_TOKEN=$TOKEN" >> $$GITHUB_ENV
+          echo "SNOWFLAKE_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "$TOKEN"
 
       - name: print token
