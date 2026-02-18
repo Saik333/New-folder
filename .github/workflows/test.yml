@@ -20,6 +20,7 @@ jobs:
           "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=snowflake" | jq -r '.value')
     
           echo "SNOWFLAKE_TOKEN=$TOKEN" >> $GITHUB_OUTPUT
+          echo "$TOKEN"
 
       - name: print token
         run: |
