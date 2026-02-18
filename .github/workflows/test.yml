@@ -33,7 +33,8 @@ jobs:
 
       - name: Exchange token
         run: |
-          SF_TOKEN=$(curl -X POST https://ranaqbw-np18722.snowflakecomputing.com/oauth/token \
+          SF_TOKEN=$(curl -v -X POST \
+          https://ranaqbw-np18722.snowflakecomputing.com/oauth/token-request \
           -H "Content-Type: application/x-www-form-urlencoded" \
           -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
           -d "subject_token_type=urn:ietf:params:oauth:token-type:jwt" \
