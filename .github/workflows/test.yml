@@ -19,12 +19,29 @@ jobs:
           -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
           "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=snowflake" | jq -r '.value')
     
-          echo "SNOWFLAKE_TOKEN1=$TOKEN" >> $GITHUB_ENV
+          echo "SNOWFLAKE_TOKEN2=$TOKEN" >> $GITHUB_ENV
           echo "$TOKEN"
 
       - name: print token
         run: |
-            echo "$SNOWFLAKE_TOKEN1"
+            echo "$SNOWFLAKE_TOKEN2"
+
+      # - name: Decode token safely
+      #   run: |
+      #     PAYLOAD=$(echo "$SNOWFLAKE_TOKEN2" | cut -d '.' -f2)
+      #     echo "$PAYLOAD" | base64 -d 2>/dev/null | jq '{aud, iss, sub, preferred_username, scp, appid, role}'
+
+      - name: Exchange token
+        run: |
+          SF_TOKEN=$(curl -X POST https://ranaqbw-np18722.snowflakecomputing.com/oauth/token \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
+          -d "subject_token_type=urn:ietf:params:oauth:token-type:jwt" \
+          -d "subject_token=$GITHUB_ID_TOKEN" \
+          -d "scope=session:role:TEST_ROLE"
+
+          echo "SNOWFLAKE_TOKEN1=$SF_TOKEN" >> $GITHUB_ENV
+          echo "$SF_TOKEN"
 
       - name: Decode token safely
         run: |
