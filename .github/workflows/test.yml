@@ -37,7 +37,7 @@ jobs:
           -H "Content-Type: application/x-www-form-urlencoded" \
           -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
           -d "subject_token_type=urn:ietf:params:oauth:token-type:jwt" \
-          -d "subject_token=$GITHUB_ID_TOKEN" \
+          -d "subject_token=$SNOWFLAKE_TOKEN2" \
           -d "scope=session:role-any")
 
           echo "SNOWFLAKE_TOKEN1=$SF_TOKEN" >> $GITHUB_ENV
