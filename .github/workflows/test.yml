@@ -38,7 +38,7 @@ jobs:
           -d "grant_type=urn:ietf:params:oauth:grant-type:token-exchange" \
           -d "subject_token_type=urn:ietf:params:oauth:token-type:jwt" \
           -d "subject_token=$GITHUB_ID_TOKEN" \
-          -d "scope=session:role:TEST_ROLE"
+          -d "scope=session:role-any")
 
           echo "SNOWFLAKE_TOKEN1=$SF_TOKEN" >> $GITHUB_ENV
           echo "$SF_TOKEN"
